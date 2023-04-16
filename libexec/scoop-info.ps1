@@ -220,6 +220,8 @@ if ($env_add_path) {
     $env_add_path | Where-Object { $_ } | ForEach-Object {
         $env_path += if ($_ -eq '.') {
             $dir
+        } elseif ($_ -match '[C-Z]:\\.*') {
+            $_
         } else {
             "$dir\$_"
         }
