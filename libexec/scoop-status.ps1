@@ -28,7 +28,7 @@ function Test-UpdateStatus($repopath) {
         if ($commits) { return $true }
         else { return $false }
     } else {
-        return $true
+        return $false
     }
 }
 
