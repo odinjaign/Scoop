@@ -807,7 +807,7 @@ function run_uninstaller($manifest, $architecture, $dir) {
             $exe = "$dir\$($uninstaller.file)"
             $arg = args $uninstaller.args
             if(!(is_in_dir $dir $exe)) {
-                warn "Error in manifest: Installer $exe is outside the app directory, skipping."
+                warn "Warning in manifest: Installer $exe is outside the app directory, skipping."
                 $exe = $null;
             } elseif(!(test-path $exe)) {
                 warn "Uninstaller $exe is missing, skipping."
@@ -974,12 +974,14 @@ function env_add_path($manifest, $dir, $global, $arch) {
         $env_add_path | Where-Object { $_ } | ForEach-Object {
             if ($_ -eq '.') {
                 $path_dir = $dir
+            } elseif ($_ -match '[C-Z]:\\.*') {
+                $path_dir = $_
             } else {
                 $path_dir = Join-Path $dir $_
             }
 
             if (!(is_in_dir $dir $path_dir)) {
-                abort "Error in manifest: env_add_path '$_' is outside the app directory."
+                info "Info in manifest: env_add_path '$_' is outside the app directory."
             }
             add_first_in_path $path_dir $global
         }
@@ -989,7 +991,11 @@ function env_add_path($manifest, $dir, $global, $arch) {
 function env_rm_path($manifest, $dir, $global, $arch) {
     $env_add_path = arch_specific 'env_add_path' $manifest $arch
     $env_add_path | Where-Object { $_ } | ForEach-Object {
-        $path_dir = Join-Path $dir $_
+        if($_.StartsWith("C:")) {
+            $path_dir = $_
+        } else {
+            $path_dir = Join-Path $dir $_
+        }
 
         remove_from_path $path_dir $global
     }
